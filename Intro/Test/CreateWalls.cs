@@ -38,19 +38,19 @@ namespace Test
 
                 XYZ start1 = new XYZ(0, 0, 0);
                 XYZ end1 = new XYZ(lOrizontal, 0, 0);
-                var bottom = CreateWall(start1, end1, document, wallType.Id, levelType, commandData);
+                var bottom = CreateWall(start1, end1, document, wallType.Id, levelType);
 
                 XYZ start2 = new XYZ(0, 0, 0);
                 XYZ end2 = new XYZ(0, lVertical, 0);
-                var left = CreateWall(start2, end2, document, wallType.Id, levelType, commandData);
+                var left = CreateWall(start2, end2, document, wallType.Id, levelType);
 
                 XYZ start3 = new XYZ(0, lVertical, 0);
                 XYZ end3 = new XYZ(lOrizontal, lVertical, 0);
-                var top = CreateWall(start3, end3, document, wallType.Id, levelType, commandData);
+                var top = CreateWall(start3, end3, document, wallType.Id, levelType);
 
                 XYZ start4 = new XYZ(lOrizontal, lVertical, 0);
                 XYZ end4 = new XYZ(lOrizontal, 0, 0);
-                var right = CreateWall(start4, end4, document, wallType.Id, levelType, commandData);
+                var right = CreateWall(start4, end4, document, wallType.Id, levelType);
 
                 //set wallID
                 JoinPair joinLeft = new JoinPair
@@ -80,10 +80,11 @@ namespace Test
             return Result.Succeeded;
         }
 
-        public Wall CreateWall(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level, ExternalCommandData commandData)
+        public Wall CreateWall(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level)
         {
-            Line line1 = Line.CreateBound(start, end);
-            var wall = Wall.Create(document, line1, wallTypeId, level.Id, UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet), 0, false, false);
+            var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            Line line = Line.CreateBound(start, end);
+            var wall = Wall.Create(document, line, wallTypeId, level.Id, height, 0, false, false);
 
             return wall;
         }

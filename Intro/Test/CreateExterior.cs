@@ -76,8 +76,9 @@ namespace Test
         
         public Wall CreateW(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level, ExternalCommandData commandData)
         {
+            var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
             Line line1 = Line.CreateBound(start, end);
-            var wall = Wall.Create(document, line1, wallTypeId, level.Id, UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet), 0, false, false);
+            var wall = Wall.Create(document, line1, wallTypeId, level.Id, height, 0, false, false);
 
             return wall;
         }

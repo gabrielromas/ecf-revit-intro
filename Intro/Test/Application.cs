@@ -20,22 +20,21 @@ namespace Test
             return Result.Succeeded;
         }
 
-        public RibbonTab RibbonTab(UIControlledApplication app)
+        public void RibbonTab(UIControlledApplication app)
         {
             string tab = "Intro";
-            RibbonTab ribbonTab = null;
             app.CreateRibbonTab(tab);
 
             Autodesk.Revit.UI.RibbonPanel ribbonPanel = app.CreateRibbonPanel(tab, "Intro Panel");
 
-            var Item1 = CreatePushButton("createWalls", "   1   ", typeof(CreateWall).FullName);
-            var Item2 = CreatePushButton("createFourWalls", "   4   ", typeof(CreateWalls).FullName);
+            var create1 = CreatePushButton("createWalls", "   1   ", typeof(CreateWall).FullName);
+            var create4 = CreatePushButton("createFourWalls", "   4   ", typeof(CreateWalls).FullName);
             
             PulldownButtonData groupData = new PulldownButtonData("pulldownBtnData", "Create\nWalls");
             PulldownButton group = ribbonPanel.AddItem(groupData) as PulldownButton;
 
-            CreatePushButtonForPullDownButton(ribbonPanel, group, Item1);
-            CreatePushButtonForPullDownButton(ribbonPanel, group, Item2);
+            CreatePushButtonForPullDownButton(group, create1);
+            CreatePushButtonForPullDownButton(group, create4);
 
             
             var Floor = CreatePushButton("createFloor", "Create\nFloors", typeof(CreateFloor).FullName);
@@ -58,15 +57,13 @@ namespace Test
 
             var JoinWalls = CreatePushButton("joinWalls", "Join\nWalls", typeof(JoinWalls).FullName);
             _ = ribbonPanel.AddItem(JoinWalls);
-
-            return ribbonTab;
         }
 
-        public PushButton CreatePushButtonForPullDownButton(Autodesk.Revit.UI.RibbonPanel panel, PulldownButton group, PushButtonData buttonName)
+        public PushButton CreatePushButtonForPullDownButton(PulldownButton group, PushButtonData buttonName)
         {
-            PushButton item = group.AddPushButton(buttonName) as PushButton;
+            PushButton pushButton = group.AddPushButton(buttonName);
 
-            return item;
+            return pushButton;
         }
 
         public PushButtonData CreatePushButton(string nameButton, string textButton, string className)

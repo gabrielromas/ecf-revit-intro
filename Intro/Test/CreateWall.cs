@@ -36,17 +36,18 @@ namespace Test
                 XYZ start = new XYZ(0, 0, 0);
                 XYZ end = new XYZ(length, 0, 0);
 
-                CreateW(start, end, document, wallType.Id, levelType, commandData);
+                CreateW(start, end, document, wallType.Id, levelType);
 
                 transaction.Commit();
             }
             return Result.Succeeded;
         }
 
-        public Wall CreateW(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level, ExternalCommandData commandData)
+        public Wall CreateW(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level)
         {
+            var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
             Line line = Line.CreateBound(start, end);
-            var wall = Wall.Create(document, line, wallTypeId, level.Id, UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet), 0, false, false);
+            var wall = Wall.Create(document, line, wallTypeId, level.Id, height, 0, false, false);
 
             return wall;
         }
