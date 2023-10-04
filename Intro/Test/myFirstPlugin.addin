@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+	<AddIn Type="Application">
+		<Name>Test</Name>
+		<Assembly>Test.dll</Assembly>
+		<AddInId>6465B621-CC75-4FBD-B16A-394F57632CD2</AddInId>
+		<FullClassName>Test.App</FullClassName>
+		<VendorId>Intro</VendorId>
+		<VendorDescription>https://github.com/MjMthimunye</VendorDescription>
+	</AddIn>
+</RevitAddIns>
