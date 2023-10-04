@@ -20,45 +20,48 @@ namespace Test
         {
             UIApplication uiapplication = commandData.Application;
             UIDocument uidocument = uiapplication.ActiveUIDocument;
-            Autodesk.Revit.ApplicationServices.Application application = uiapplication.Application;
             Document document = uidocument.Document;
 
             var topId = App.walls[WallSide.Top];
-            var bottomId = App.walls[WallSide.Bottom];
             var topElement = document.GetElement(topId.WallID);
+
+            var bottomId = App.walls[WallSide.Bottom];
             var bottomElement = document.GetElement(bottomId.WallID);
 
-            var window = new FilteredElementCollector(document)
+            var windowSymbol = new FilteredElementCollector(document)
                 .OfClass(typeof(FamilySymbol))
                 .Cast<FamilySymbol>()
-                .FirstOrDefault(d => d.FamilyName == (WINDOW_FAMILY_NAME) && d.Name == WINDOW_NAME);
+                .FirstOrDefault(d => d.FamilyName == WINDOW_FAMILY_NAME && d.Name == WINDOW_NAME);
 
-            double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            double heigh = UnitUtils.Convert(1000, UnitTypeId.Millimeters, UnitTypeId.Feet);
-
-            using (Transaction tx = new Transaction(document, "Create Doors"))
+            if (windowSymbol != null)
             {
-                tx.Start();
+                double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
+                double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
+                double heigh = UnitUtils.Convert(100, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
-                if (window != null)
+                using (Transaction tx = new Transaction(document, "Create Windows"))
                 {
+                    tx.Start();
+
                     XYZ location = new XYZ(lengthX / 2, lengthY / 2, heigh);
 
-                    FamilyInstance door1Instance = document.Create.NewFamilyInstance(
+                    var window1 = document.Create.NewFamilyInstance(
                         location,
-                        window,
+                        windowSymbol,
                         topElement,
                         StructuralType.NonStructural);
 
-                    FamilyInstance door2Instance = document.Create.NewFamilyInstance(
+                    var window2 = document.Create.NewFamilyInstance(
                         location,
-                        window,
+                        windowSymbol,
                         bottomElement,
                         StructuralType.NonStructural);
-                }
 
-                tx.Commit();
+                    App.elementIDS.Add(window1.Id);
+                    App.elementIDS.Add(window2.Id);
+
+                    tx.Commit();
+                }
             }
 
             return Result.Succeeded;

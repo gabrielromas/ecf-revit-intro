@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Test
 {
@@ -10,7 +11,7 @@ namespace Test
     public class CreateExterior : IExternalCommand
     {
         private string EXTERIOR_FAMILY = "EXT_INSexp-5cm";
-        private string LEVEL_FAMILY = "Parter";
+        private string LEVEL_NAME = "Parter";
         private string WALL_FAMILY = "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60";
 
         public Result Execute(
@@ -29,14 +30,14 @@ namespace Test
             var level = new FilteredElementCollector(document)
                .OfClass(typeof(Level))
                .Cast<Level>()
-               .FirstOrDefault(l => l.Name == LEVEL_FAMILY);
+               .FirstOrDefault(l => l.Name == LEVEL_NAME);
 
             var wall = new FilteredElementCollector(document)
                .OfCategory(BuiltInCategory.OST_Walls)
                .FirstOrDefault(w => w.Name == WALL_FAMILY);
 
-            double widthWall = Width(document, wall);
-            double widthExterior = Width(document, exterior);
+            double widthWall = GetWidth(document, wall);
+            double widthExterior = GetWidth(document, exterior);
             double width = widthExterior + widthWall;
             double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
             double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
@@ -66,6 +67,11 @@ namespace Test
                 App.walls[WallSide.Top].ExteriorID = top.UniqueId;
                 App.walls[WallSide.Right].ExteriorID = right.UniqueId;
 
+                App.elementIDS.Add(left.Id);
+                App.elementIDS.Add(right.Id);
+                App.elementIDS.Add(top.Id);
+                App.elementIDS.Add(bottom.Id);
+
                 tx.Commit();
             }
 
@@ -74,16 +80,29 @@ namespace Test
 
         public Wall Create(Document document, ElementId wallId, XYZ start, XYZ end, Element level)
         {
-            var line = Line.CreateBound(start, end);
-            var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            var wall = Wall.Create(document, line, wallId, level.Id, height, 0, false, false);
+            if (wallId != null)
+            {
+                var line = Line.CreateBound(start, end);
+                var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
+                var wall = Wall.Create(document, line, wallId, level.Id, height, 0, false, false);
 
-            return wall;
+                return wall;
+            }
+
+            return default;
         }
 
-        public double Width(Document document, Element wall)
+        public double GetWidth(Document document, Element wall)
         {
-            return (document.GetElement(wall.Id) as WallType).Width / 2;
+            if (wall != null)
+            {
+                var wallID = document.GetElement(wall.Id) as WallType;
+                double width = wallID.Width;
+
+                return width / 2;
+            }
+
+            return default;
         }
     }
 }

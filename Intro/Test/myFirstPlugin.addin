@@ -4,8 +4,8 @@
 		<Name>Test</Name>
 		<Assembly>Test.dll</Assembly>
 		<AddInId>6465B621-CC75-4FBD-B16A-394F57632CD2</AddInId>
-		<FullClassName>Test.Application</FullClassName>
-		<VendorId>Jacobian Dev</VendorId>
+		<FullClassName>Test.App</FullClassName>
+		<VendorId>Intro</VendorId>
 		<VendorDescription>https://github.com/MjMthimunye</VendorDescription>
 	</AddIn>
 </RevitAddIns>

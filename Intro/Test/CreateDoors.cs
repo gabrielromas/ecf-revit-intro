@@ -25,36 +25,43 @@ namespace Test
             var left = document.GetElement(App.walls[WallSide.Left].WallID);
             var right = document.GetElement(App.walls[WallSide.Right].WallID);
 
-            var door = new FilteredElementCollector(document)
+            var doorSymbol = new FilteredElementCollector(document)
                 .OfClass(typeof(FamilySymbol))
                 .Cast<FamilySymbol>()
-                .FirstOrDefault(d => d.FamilyName == (DOOR_FAMILY_NAME) && d.Name == DOOR_NAME);
+                .FirstOrDefault(d => d.FamilyName == DOOR_FAMILY_NAME && d.Name == DOOR_NAME);
 
-            double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
-
-            using (Transaction tx = new Transaction(document, "Create Doors"))
+            if (doorSymbol != null)
             {
-                tx.Start();
+                double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
+                double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
-                if (door != null)
+                using (Transaction tx = new Transaction(document, "Create 2 Doors"))
                 {
+                    tx.Start();
+
                     XYZ location = new XYZ(lengthX / 2, lengthY / 2, 0);
 
-                    _ = document.Create.NewFamilyInstance(
+                    var door1 = document.Create.NewFamilyInstance(
                         location,
-                        door,
+                        doorSymbol,
                         left,
                         StructuralType.NonStructural);
 
-                    _ = document.Create.NewFamilyInstance(
+                    var door2 = document.Create.NewFamilyInstance(
                         location,
-                        door,
+                        doorSymbol,
                         right,
                         StructuralType.NonStructural);
-                }
 
-                tx.Commit();
+                    App.elementIDS.Add(door1.Id);
+                    App.elementIDS.Add(door2.Id);
+
+                    tx.Commit();
+                }
+            }
+            else
+            {
+                return Result.Failed;
             }
 
             return Result.Succeeded;

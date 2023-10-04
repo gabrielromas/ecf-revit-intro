@@ -46,13 +46,18 @@ namespace Test
             return Result.Succeeded;
         }
 
-        public Wall Create(Document document, ElementId wallTypeId, XYZ start, XYZ end, Element level)
+        public Wall Create(Document document, ElementId wallId, XYZ start, XYZ end, Element level)
         {
-            var line = Line.CreateBound(start, end);
-            var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            var wall = Wall.Create(document, line, wallTypeId, level.Id, height, 0, false, false);
+            if (wallId != null)
+            {
+                var line = Line.CreateBound(start, end);
+                var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
+                var wall = Wall.Create(document, line, wallId, level.Id, height, 0, false, false);
 
-            return wall;
+                return wall;
+            }
+
+            return default;
         }
     }
 }
