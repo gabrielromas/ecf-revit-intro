@@ -10,6 +10,9 @@ namespace Test
 
     public class CreateWalls : IExternalCommand
     {
+        public string WALL_FAMILY = "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60";
+        public string LEVEL_FAMILY = "Parter";
+
         public Result Execute(
             ExternalCommandData commandData,
             ref string message,
@@ -17,70 +20,65 @@ namespace Test
         {
             UIApplication uiapplication = commandData.Application;
             UIDocument uidocument = uiapplication.ActiveUIDocument;
-            Autodesk.Revit.ApplicationServices.Application application = uiapplication.Application;
             Document document = uidocument.Document;
 
-            var wallType = new FilteredElementCollector(document)
+            var wall = new FilteredElementCollector(document)
                .OfCategory(BuiltInCategory.OST_Walls)
-               .FirstOrDefault(w => w.Name == "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60");
+               .FirstOrDefault(w => w.Name == WALL_FAMILY);
 
-            var levelType = new FilteredElementCollector(document)
+            var level = new FilteredElementCollector(document)
                .OfClass(typeof(Level))
-               .FirstOrDefault(l => l.Name == "Parter");
+               .Cast<Level>()
+               .FirstOrDefault(l => l.Name == LEVEL_FAMILY);
 
             //conversion feet to centimeters
-            var lOrizontal = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            var lVertical = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
-            using (Transaction transaction = new Transaction(document))
+            using (Transaction tx = new Transaction(document))
             {
-                transaction.Start("Create Wall1");
+                tx.Start("Create Walls");
 
                 XYZ start1 = new XYZ(0, 0, 0);
-                XYZ end1 = new XYZ(lOrizontal, 0, 0);
-                var bottom = CreateWall(start1, end1, document, wallType.Id, levelType);
+                XYZ end1 = new XYZ(lengthX, 0, 0);
+                var bottom = Create(start1, end1, document, wall.Id, level);
 
                 XYZ start2 = new XYZ(0, 0, 0);
-                XYZ end2 = new XYZ(0, lVertical, 0);
-                var left = CreateWall(start2, end2, document, wallType.Id, levelType);
+                XYZ end2 = new XYZ(0, lengthY, 0);
+                var left = Create(start2, end2, document, wall.Id, level);
 
-                XYZ start3 = new XYZ(0, lVertical, 0);
-                XYZ end3 = new XYZ(lOrizontal, lVertical, 0);
-                var top = CreateWall(start3, end3, document, wallType.Id, levelType);
+                XYZ start3 = new XYZ(0, lengthY, 0);
+                XYZ end3 = new XYZ(lengthX, lengthY, 0);
+                var top = Create(start3, end3, document, wall.Id, level);
 
-                XYZ start4 = new XYZ(lOrizontal, lVertical, 0);
-                XYZ end4 = new XYZ(lOrizontal, 0, 0);
-                var right = CreateWall(start4, end4, document, wallType.Id, levelType);
+                XYZ start4 = new XYZ(lengthX, lengthY, 0);
+                XYZ end4 = new XYZ(lengthX, 0, 0);
+                var right = Create(start4, end4, document, wall.Id, level);
 
-                //set wallID
-                JoinPair joinLeft = new JoinPair
-                {
-                    WallID = left.UniqueId
-                };
-                JoinPair joinRight = new JoinPair
-                {
-                    WallID = right.UniqueId
-                };
-                JoinPair joinBottom = new JoinPair
+                App.walls[WallSide.Bottom] = new JoinPair
                 {
                     WallID = bottom.UniqueId
                 };
-                JoinPair joinTop = new JoinPair
+                App.walls[WallSide.Left] = new JoinPair
+                {
+                    WallID = left.UniqueId
+                }; 
+                App.walls[WallSide.Top] = new JoinPair
                 {
                     WallID = top.UniqueId
                 };
+                App.walls[WallSide.Right] = new JoinPair
+                {
+                    WallID = right.UniqueId
+                };
 
-                Application.wallsDictionary["bottomWall"] = joinBottom;
-                Application.wallsDictionary["leftWall"] = joinLeft;
-                Application.wallsDictionary["topWall"] = joinTop;
-                Application.wallsDictionary["rightWall"] = joinRight;
-
-                transaction.Commit();
+                tx.Commit();
             }
+
             return Result.Succeeded;
         }
 
-        public Wall CreateWall(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level)
+        public Wall Create(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level)
         {
             var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
             Line line = Line.CreateBound(start, end);
@@ -88,7 +86,6 @@ namespace Test
 
             return wall;
         }
-
     }
 }
 

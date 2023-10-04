@@ -9,6 +9,9 @@ namespace Test
     [Regeneration(RegenerationOption.Manual)]
     public class CreateWall : IExternalCommand
     {
+        private string LEVEL_FAMILY = "Parter";
+        private string WALL_FAMILY = "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60";
+
         public Result Execute(
             ExternalCommandData commandData,
             ref string message,
@@ -16,34 +19,34 @@ namespace Test
         {
             UIApplication uiapplication = commandData.Application;
             UIDocument uidocument = uiapplication.ActiveUIDocument;
-            Autodesk.Revit.ApplicationServices.Application application = uiapplication.Application;
             Document document = uidocument.Document;
 
-            var levelType = new FilteredElementCollector(document)
+            var level = new FilteredElementCollector(document)
                 .OfClass(typeof(Level))
-                .FirstOrDefault(l => l.Name == "Parter");
+                .Cast<Level>()
+                .FirstOrDefault(l => l.Name == LEVEL_FAMILY);
 
-            var wallType = new FilteredElementCollector(document)
+            var wall = new FilteredElementCollector(document)
                 .OfCategory(BuiltInCategory.OST_Walls)
-                .FirstOrDefault(w => w.Name == "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60");
+                .FirstOrDefault(w => w.Name == WALL_FAMILY);
                 
-            var length = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            double length = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
-            using (Transaction transaction = new Transaction(document))
+            using (Transaction tx = new Transaction(document))
             {
-                transaction.Start("Create Wall");
+                tx.Start("Create Wall");
 
                 XYZ start = new XYZ(0, 0, 0);
                 XYZ end = new XYZ(length, 0, 0);
+                _ = Create(start, end, document, wall.Id, level);
 
-                CreateW(start, end, document, wallType.Id, levelType);
-
-                transaction.Commit();
+                tx.Commit();
             }
+
             return Result.Succeeded;
         }
 
-        public Wall CreateW(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level)
+        public Wall Create(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level)
         {
             var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
             Line line = Line.CreateBound(start, end);
@@ -51,6 +54,5 @@ namespace Test
 
             return wall;
         }
-
     }
 }

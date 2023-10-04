@@ -21,25 +21,25 @@ namespace Test
             Document document = uidocument.Document;
 
             //Convert String to Wall
-            var bottom = document.GetElement(Application.wallsDictionary["bottomWall"].WallID) as Wall;
-            var bottomExt = document.GetElement(Application.wallsDictionary["bottomWall"].WallExteriorID) as Wall;
-            var bottomInt = document.GetElement(Application.wallsDictionary["bottomWall"].WallInteriorID) as Wall;
+            var bottom = document.GetElement(App.walls[WallSide.Bottom].WallID) as Wall;
+            var bottomExt = document.GetElement(App.walls[WallSide.Bottom].ExteriorID) as Wall;
+            var bottomInt = document.GetElement(App.walls[WallSide.Bottom].InteriorID) as Wall;
 
-            var top = document.GetElement(Application.wallsDictionary["topWall"].WallID) as Wall;
-            var topExt = document.GetElement(Application.wallsDictionary["topWall"].WallExteriorID) as Wall;
-            var topInt = document.GetElement(Application.wallsDictionary["topWall"].WallInteriorID) as Wall;
+            var top = document.GetElement(App.walls[WallSide.Top].WallID) as Wall;
+            var topExt = document.GetElement(App.walls[WallSide.Top].ExteriorID) as Wall;
+            var topInt = document.GetElement(App.walls[WallSide.Top].InteriorID) as Wall;
 
-            var left = document.GetElement(Application.wallsDictionary["leftWall"].WallID) as Wall;
-            var leftExt = document.GetElement(Application.wallsDictionary["leftWall"].WallExteriorID) as Wall;
-            var leftInt = document.GetElement(Application.wallsDictionary["leftWall"].WallInteriorID) as Wall;
+            var left = document.GetElement(App.walls[WallSide.Left].WallID) as Wall;
+            var leftExt = document.GetElement(App.walls[WallSide.Left].ExteriorID) as Wall;
+            var leftInt = document.GetElement(App.walls[WallSide.Left].InteriorID) as Wall;
 
-            var right = document.GetElement(Application.wallsDictionary["rightWall"].WallID) as Wall;
-            var rightExt = document.GetElement(Application.wallsDictionary["rightWall"].WallExteriorID) as Wall;
-            var rightInt = document.GetElement(Application.wallsDictionary["rightWall"].WallInteriorID) as Wall;
+            var right = document.GetElement(App.walls[WallSide.Right].WallID) as Wall;
+            var rightExt = document.GetElement(App.walls[WallSide.Right].ExteriorID) as Wall;
+            var rightInt = document.GetElement(App.walls[WallSide.Right].InteriorID) as Wall;
 
-            using (Transaction transaction = new Transaction(document, "Join Walls"))
+            using (Transaction tx = new Transaction(document, "Join Walls"))
             {
-                transaction.Start();
+                tx.Start();
 
                 try
                 {
@@ -81,7 +81,7 @@ namespace Test
                     Debug.WriteLine($"Processing failed: {ex.Message}");
                 }
 
-                transaction.Commit();
+                tx.Commit();
             }
 
             return Result.Succeeded;

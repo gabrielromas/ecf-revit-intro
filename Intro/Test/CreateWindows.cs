@@ -20,43 +20,43 @@ namespace Test
             Autodesk.Revit.ApplicationServices.Application application = uiapplication.Application;
             Document document = uidocument.Document;
 
-            var wall1Id = Application.wallsDictionary["topWall"];
-            var wall2Id = Application.wallsDictionary["bottomWall"];
+            var wallTopId = App.walls[WallSide.Top];
+            var wallBottomId = App.walls[WallSide.Bottom];
 
-            var wall1Element = document.GetElement(wall1Id.WallID);
-            var wall2Element = document.GetElement(wall2Id.WallID);
+            var wallTopElement = document.GetElement(wallTopId.WallID);
+            var wallBottomElement = document.GetElement(wallBottomId.WallID);
 
-            var windowType = new FilteredElementCollector(document)
+            var window = new FilteredElementCollector(document)
                 .OfClass(typeof(FamilySymbol))
                 .Cast<FamilySymbol>()
                 .FirstOrDefault(d => d.FamilyName == ("EXT Fereastra un canat") && d.Name == "1000X800");
 
-            var lengthOrizontal = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            var lengthVertical = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            var heigh = UnitUtils.Convert(1000, UnitTypeId.Millimeters, UnitTypeId.Feet);
+            double lengthOrizontal = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            double lengthVertical = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            double heigh = UnitUtils.Convert(1000, UnitTypeId.Millimeters, UnitTypeId.Feet);
 
-            using (Transaction transaction = new Transaction(document, "Adaugare Usa"))
+            using (Transaction tx = new Transaction(document, "Adaugare Usa"))
             {
-                transaction.Start();
+                tx.Start();
 
-                if (windowType != null)
+                if (window != null)
                 {
                     XYZ location = new XYZ(lengthOrizontal / 2, lengthVertical / 2, heigh);
 
                     FamilyInstance door1Instance = document.Create.NewFamilyInstance(
                         location,
-                        windowType,
-                        wall1Element,
+                        window,
+                        wallTopElement,
                         StructuralType.NonStructural);
 
                     FamilyInstance door2Instance = document.Create.NewFamilyInstance(
                         location,
-                        windowType,
-                        wall2Element,
+                        window,
+                        wallBottomElement,
                         StructuralType.NonStructural);
-
                 }
-                transaction.Commit();
+
+                tx.Commit();
             }
 
             return Result.Succeeded;

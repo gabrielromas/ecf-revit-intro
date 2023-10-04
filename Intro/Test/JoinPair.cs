@@ -4,8 +4,8 @@
     {
         public string WallID { get; set; }
 
-        public string WallExteriorID { get; set; }
+        public string ExteriorID { get; set; }
         
-        public string WallInteriorID { get; set; }
+        public string InteriorID { get; set; }
     }
 }

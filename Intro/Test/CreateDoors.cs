@@ -7,9 +7,12 @@ using System.Linq;
 namespace Test
 {
     [Transaction(TransactionMode.Manual)]
-    [Regeneration(RegenerationOption.Manual)]   
+    [Regeneration(RegenerationOption.Manual)]
     public class CreateDoors : IExternalCommand
     {
+        private string DOOR_FAMILY_NAME = "EXT Usa metalica un canat";
+        private string DOOR_NAME = "UP 1 900 x 2400mm";
+
         public Result Execute(
             ExternalCommandData commandData,
             ref string message,
@@ -17,41 +20,41 @@ namespace Test
         {
             UIApplication uiapplication = commandData.Application;
             UIDocument uidocument = uiapplication.ActiveUIDocument;
-            Autodesk.Revit.ApplicationServices.Application application = uiapplication.Application;
             Document document = uidocument.Document;
 
-            var left = document.GetElement(Application.wallsDictionary["leftWall"].WallID);
-            var right = document.GetElement(Application.wallsDictionary["rightWall"].WallID);
+            var left = document.GetElement(App.walls[WallSide.Left].WallID);
+            var right = document.GetElement(App.walls[WallSide.Right].WallID);
 
-            var doorType = new FilteredElementCollector(document)
+            var door = new FilteredElementCollector(document)
                 .OfClass(typeof(FamilySymbol))
                 .Cast<FamilySymbol>()
-                .FirstOrDefault(d => d.FamilyName == ("EXT Usa metalica un canat") && d.Name == "UP 1 900 x 2400mm");
+                .FirstOrDefault(d => d.FamilyName == (DOOR_FAMILY_NAME) && d.Name == DOOR_NAME);
 
-            var lengthOrizontal = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            var lengthVertical = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
-            using (Transaction transaction = new Transaction(document, "Adaugare Usa"))
+            using (Transaction tx = new Transaction(document, "Create Doors"))
             {
-                transaction.Start();
+                tx.Start();
 
-                if (doorType != null)
+                if (door != null)
                 {
-                    XYZ location = new XYZ(lengthOrizontal / 2, lengthVertical / 2, 0);
+                    XYZ location = new XYZ(lengthX / 2, lengthY / 2, 0);
 
                     FamilyInstance door1Instance = document.Create.NewFamilyInstance(
                         location,
-                        doorType,
+                        door,
                         left,
                         StructuralType.NonStructural);
 
                     FamilyInstance door2Instance = document.Create.NewFamilyInstance(
                         location,
-                        doorType,
+                        door,
                         right,
                         StructuralType.NonStructural);
                 }
-                transaction.Commit();
+
+                tx.Commit();
             }
 
             return Result.Succeeded;

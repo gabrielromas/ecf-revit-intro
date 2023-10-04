@@ -10,6 +10,10 @@ namespace Test
 
     public class CreateInterior : IExternalCommand
     {
+        private string INTERIOR_WALL_FAMILY = "INT_F_PLA_LAV gri-CTI10";
+        private string WALL_FAMILY = "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60";
+        private string LEVEL_FAMILY = "Parter";
+
         public Result Execute(
             ExternalCommandData commandData,
             ref string message,
@@ -17,57 +21,56 @@ namespace Test
         {
             UIApplication uiapplication = commandData.Application;
             UIDocument uidocument = uiapplication.ActiveUIDocument;
-            Autodesk.Revit.ApplicationServices.Application application = uiapplication.Application;
             Document document = uidocument.Document;
 
-            var interiorType = new FilteredElementCollector(document)
+            var interior = new FilteredElementCollector(document)
                .OfCategory(BuiltInCategory.OST_StackedWalls)
-               .FirstOrDefault(wInterior => wInterior.Name == "INT_F_PLA_LAV gri-CTI10");
+               .FirstOrDefault(wInterior => wInterior.Name == INTERIOR_WALL_FAMILY);
 
-            var wallType = new FilteredElementCollector(document)
+            var wall = new FilteredElementCollector(document)
                .OfCategory(BuiltInCategory.OST_Walls)
-               .FirstOrDefault(w => w.Name == "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60");
+               .FirstOrDefault(w => w.Name == WALL_FAMILY);
 
-            var levelType = new FilteredElementCollector(document)
+            var level = new FilteredElementCollector(document)
                .OfClass(typeof(Level))
-               .FirstOrDefault(l => l.Name == "Parter");
+               .Cast<Level>()
+               .FirstOrDefault(l => l.Name == LEVEL_FAMILY);
 
-            var widthWall = Width(document, wallType);
-            var widthInterior = Width(document, interiorType);
-            var width = widthInterior + widthWall;
+            var widthWall = Width(document, wall);
+            var widthInterior = Width(document, interior);
+            double width = widthInterior + widthWall;
 
-            //conversion to centimeters
-            var lengthOrizontal = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            var lengthVertical = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
-            using (Transaction transaction = new Transaction(document))
+            using (Transaction tx = new Transaction(document))
             {
-                transaction.Start("Create InteriorWalls");
+                tx.Start("Create Interior Walls");
 
                 XYZ start1 = new XYZ(width, width, 0);
-                XYZ end1 = new XYZ(lengthOrizontal - width, width, 0);
-                var bottom = CreateW(start1, end1, document, interiorType.Id, levelType);
+                XYZ end1 = new XYZ(lengthX - width, width, 0);
+                var bottom = CreateW(start1, end1, document, interior.Id, level);
                
                 XYZ start2 = new XYZ(width, width, 0);
-                XYZ end2 = new XYZ(width, lengthVertical - width, 0);
-                var left = CreateW(start2, end2, document, interiorType.Id, levelType);
+                XYZ end2 = new XYZ(width, lengthY - width, 0);
+                var left = CreateW(start2, end2, document, interior.Id, level);
                
-                XYZ start3 = new XYZ(width, lengthVertical - width, 0);
-                XYZ end3 = new XYZ(lengthOrizontal - width, lengthVertical - width, 0);
-                var top = CreateW(start3, end3, document, interiorType.Id, levelType);
+                XYZ start3 = new XYZ(width, lengthY - width, 0);
+                XYZ end3 = new XYZ(lengthX - width, lengthY - width, 0);
+                var top = CreateW(start3, end3, document, interior.Id, level);
                 
-                XYZ start4 = new XYZ(lengthOrizontal - width, lengthVertical - width, 0);
-                XYZ end4 = new XYZ(lengthOrizontal - width, width, 0);
-                var right = CreateW(start4, end4, document, interiorType.Id, levelType);
+                XYZ start4 = new XYZ(lengthX - width, lengthY - width, 0);
+                XYZ end4 = new XYZ(lengthX - width, width, 0);
+                var right = CreateW(start4, end4, document, interior.Id, level);
 
-                //add interior wall id to dictionary
-                Application.wallsDictionary["bottomWall"].WallInteriorID = bottom.UniqueId;
-                Application.wallsDictionary["leftWall"].WallInteriorID = left.UniqueId;
-                Application.wallsDictionary["topWall"].WallInteriorID = top.UniqueId;
-                Application.wallsDictionary["rightWall"].WallInteriorID = right.UniqueId;
+                App.walls[WallSide.Bottom].InteriorID = bottom.UniqueId;
+                App.walls[WallSide.Left].InteriorID = left.UniqueId;
+                App.walls[WallSide.Top].InteriorID = top.UniqueId;
+                App.walls[WallSide.Right].InteriorID = right.UniqueId;
 
-                transaction.Commit();
+                tx.Commit();
             }
+
             return Result.Succeeded;
         }
 

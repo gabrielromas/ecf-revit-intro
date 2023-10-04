@@ -10,6 +10,10 @@ namespace Test
 
     public class CreateExterior : IExternalCommand
     {
+        private string EXTERIOR_FAMILY = "EXT_INSexp-5cm";
+        private string LEVEL_FAMILY = "Parter";
+        private string WALL_FAMILY = "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60";
+
         public Result Execute(
             ExternalCommandData commandData,
             ref string message,
@@ -20,60 +24,57 @@ namespace Test
             Autodesk.Revit.ApplicationServices.Application application = uiapplication.Application;
             Document document = uidocument.Document;
 
-            var exteriorType = new FilteredElementCollector(document)
+            var exterior = new FilteredElementCollector(document)
                .OfCategory(BuiltInCategory.OST_Walls)
-               .FirstOrDefault(w => w.Name == "EXT_INSexp-5cm");
+               .FirstOrDefault(w => w.Name == EXTERIOR_FAMILY);
 
-            var levelType = new FilteredElementCollector(document)
+            var level = new FilteredElementCollector(document)
                .OfClass(typeof(Level))
-               .FirstOrDefault(l => l.Name == "Parter");
+               .Cast<Level>()
+               .FirstOrDefault(l => l.Name == LEVEL_FAMILY);
 
-            var wallType = new FilteredElementCollector(document)
+            var wall = new FilteredElementCollector(document)
                .OfCategory(BuiltInCategory.OST_Walls)
-               .FirstOrDefault(w => w.Name == "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60");
+               .FirstOrDefault(w => w.Name == WALL_FAMILY);
 
-            var widthWall = Width(document, wallType);
-            var widthExterior = Width(document, exteriorType);
-            var width = widthExterior + widthWall;
+            var widthWall = Width(document, wall);
+            var widthExterior = Width(document, exterior);
+            double width = widthExterior + widthWall;
 
-            //conversion feet to centimeters
-            var lengthOrizontal = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            var lengthVertical = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
+            double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
-            using (Transaction transaction = new Transaction(document))
+            using (Transaction tx = new Transaction(document))
             {
-                transaction.Start("Create ExteriorWalls");
+                tx.Start("Create Exterior Walls");
 
-                //create exterior walls
                 XYZ start1 = new XYZ(-width, -width, 0);
-                XYZ end1 = new XYZ(lengthOrizontal + width, -width, 0);
-                var bottom = CreateW(start1, end1, document, exteriorType.Id, levelType, commandData);
-                
+                XYZ end1 = new XYZ(lengthX + width, -width, 0);
+                var bottom = CreateW(start1, end1, document, exterior.Id, level, commandData);
+
                 XYZ start2 = new XYZ(-width, -width, 0);
-                XYZ end2 = new XYZ(-width, lengthVertical + width, 0);
-                var left = CreateW(start2, end2, document, exteriorType.Id, levelType, commandData);
-                
-                XYZ start3 = new XYZ(-width, lengthVertical + width, 0);
-                XYZ end3 = new XYZ(lengthOrizontal + width, lengthVertical + width, 0);
-                var top = CreateW(start3, end3, document, exteriorType.Id, levelType, commandData);
-                
-                XYZ start4 = new XYZ(lengthOrizontal + width, lengthVertical + width, 0);
-                XYZ end4 = new XYZ(lengthOrizontal + width, -width, 0);
-                var right = CreateW(start4, end4, document, exteriorType.Id, levelType, commandData);
+                XYZ end2 = new XYZ(-width, lengthY + width, 0);
+                var left = CreateW(start2, end2, document, exterior.Id, level, commandData);
 
-                //add exterior wall id to dictionary
-                Application.wallsDictionary["bottomWall"].WallExteriorID = bottom.UniqueId;
-                Application.wallsDictionary["leftWall"].WallExteriorID = left.UniqueId;
-                Application.wallsDictionary["topWall"].WallExteriorID = top.UniqueId;
-                Application.wallsDictionary["rightWall"].WallExteriorID = right.UniqueId;
+                XYZ start3 = new XYZ(-width, lengthY + width, 0);
+                XYZ end3 = new XYZ(lengthX + width, lengthY + width, 0);
+                var top = CreateW(start3, end3, document, exterior.Id, level, commandData);
 
-                transaction.Commit();
+                XYZ start4 = new XYZ(lengthX + width, lengthY + width, 0);
+                XYZ end4 = new XYZ(lengthX + width, -width, 0);
+                var right = CreateW(start4, end4, document, exterior.Id, level, commandData);
+
+                App.walls[WallSide.Bottom].ExteriorID = bottom.UniqueId;
+                App.walls[WallSide.Left].ExteriorID = left.UniqueId;
+                App.walls[WallSide.Top].ExteriorID = top.UniqueId;
+                App.walls[WallSide.Right].ExteriorID = right.UniqueId;
+
+                tx.Commit();
             }
 
             return Result.Succeeded;
         }
 
-        
         public Wall CreateW(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level, ExternalCommandData commandData)
         {
             var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
@@ -88,40 +89,7 @@ namespace Test
             WallType wallType = document.GetElement(wall.Id) as WallType;
             double width = wallType.Width;
 
-            return width/2;
+            return width / 2;
         }
     }
 }
-
-
-/*public double GetStackedWallWidth(Document document, WallType wallType)
-{
-    double result = 0;
-
-    Level firstLevel = new FilteredElementCollector(document)
-        .OfType<Level>()
-        .FirstOrDefault();
-
-    using (Transaction tx = new Transaction(document, "Get stacked wall width"))
-    {
-        tx.Start();
-
-        XYZ start1 = new XYZ(0, 0, 0);
-        XYZ end1 = new XYZ(0, 0, 0);
-        Line line1 = Line.CreateBound(start1, end1);
-        var createdWall = Wall.Create(document, line1, wallType.Id, firstLevel.Id, UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet), 0, false, false);
-
-        document.Regenerate();
-
-        double width = createdWall.Width;
-
-        var stackWallWidth = createdWall.GetStackedWallMemberIds();
-
-        //return width 
-
-        tx.RollBack();
-    }
-
-
-    return result;
-}*/
