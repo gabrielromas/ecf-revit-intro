@@ -41,13 +41,13 @@ namespace Test
                 {
                     XYZ location = new XYZ(lengthX / 2, lengthY / 2, 0);
 
-                    FamilyInstance door1Instance = document.Create.NewFamilyInstance(
+                    _ = document.Create.NewFamilyInstance(
                         location,
                         door,
                         left,
                         StructuralType.NonStructural);
 
-                    FamilyInstance door2Instance = document.Create.NewFamilyInstance(
+                    _ = document.Create.NewFamilyInstance(
                         location,
                         door,
                         right,

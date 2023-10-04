@@ -36,10 +36,9 @@ namespace Test
                .Cast<Level>()
                .FirstOrDefault(l => l.Name == LEVEL_FAMILY);
 
-            var widthWall = Width(document, wall);
-            var widthInterior = Width(document, interior);
+            double widthWall = Width(document, wall);
+            double widthInterior = Width(document, interior);
             double width = widthInterior + widthWall;
-
             double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
             double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
@@ -49,19 +48,19 @@ namespace Test
 
                 XYZ start1 = new XYZ(width, width, 0);
                 XYZ end1 = new XYZ(lengthX - width, width, 0);
-                var bottom = CreateW(start1, end1, document, interior.Id, level);
-               
+                var bottom = Create(document, interior.Id, start1, end1, level);
+
                 XYZ start2 = new XYZ(width, width, 0);
                 XYZ end2 = new XYZ(width, lengthY - width, 0);
-                var left = CreateW(start2, end2, document, interior.Id, level);
-               
+                var left = Create(document, interior.Id, start2, end2, level);
+
                 XYZ start3 = new XYZ(width, lengthY - width, 0);
                 XYZ end3 = new XYZ(lengthX - width, lengthY - width, 0);
-                var top = CreateW(start3, end3, document, interior.Id, level);
-                
+                var top = Create(document, interior.Id, start3, end3, level);
+
                 XYZ start4 = new XYZ(lengthX - width, lengthY - width, 0);
                 XYZ end4 = new XYZ(lengthX - width, width, 0);
-                var right = CreateW(start4, end4, document, interior.Id, level);
+                var right = Create(document, interior.Id, start4, end4, level);
 
                 App.walls[WallSide.Bottom].InteriorID = bottom.UniqueId;
                 App.walls[WallSide.Left].InteriorID = left.UniqueId;
@@ -74,21 +73,18 @@ namespace Test
             return Result.Succeeded;
         }
 
-        public Wall CreateW(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level)
+        public Wall Create(Document document, ElementId wallId, XYZ start, XYZ end, Element level)
         {
+            var line1 = Line.CreateBound(start, end);
             var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            Line line1 = Line.CreateBound(start, end);
-            var wall = Wall.Create(document, line1, wallTypeId, level.Id, height, 0, false, false);
+            var wall = Wall.Create(document, line1, wallId, level.Id, height, 0, false, false);
 
             return wall;
         }
 
         public double Width(Document document, Element wall)
         {
-            WallType wallType = document.GetElement(wall.Id) as WallType;
-            double width = wallType.Width;
-
-            return width/2;
+            return (document.GetElement(wall.Id) as WallType).Width / 2;
         }
     }
 }

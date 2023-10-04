@@ -7,7 +7,7 @@ namespace Test
     public class App : IExternalApplication
     {
         public static Dictionary<WallSide, JoinPair> walls = new Dictionary<WallSide, JoinPair>();
-        
+
         public Result OnStartup(UIControlledApplication app)
         {
             RibbonTab(app);
@@ -28,14 +28,13 @@ namespace Test
 
             var create1 = CreatePushButton("createWalls", "   1   ", typeof(CreateWall).FullName);
             var create4 = CreatePushButton("createFourWalls", "   4   ", typeof(CreateWalls).FullName);
-            
+
             PulldownButtonData groupData = new PulldownButtonData("pulldownBtnData", "Create\nWalls");
             PulldownButton group = ribbonPanel.AddItem(groupData) as PulldownButton;
 
             CreatePushButtonForPullDownButton(group, create1);
             CreatePushButtonForPullDownButton(group, create4);
 
-            
             var floor = CreatePushButton("createFloor", "Create\nFloor", typeof(CreateFloor).FullName);
             _ = ribbonPanel.AddItem(floor);
 
@@ -56,6 +55,7 @@ namespace Test
 
             var joinWalls = CreatePushButton("joinWalls", "Join\nWalls", typeof(JoinWalls).FullName);
             _ = ribbonPanel.AddItem(joinWalls);
+
         }
 
         public PushButton CreatePushButtonForPullDownButton(PulldownButton group, PushButtonData buttonName)

@@ -29,7 +29,7 @@ namespace Test
             var wall = new FilteredElementCollector(document)
                 .OfCategory(BuiltInCategory.OST_Walls)
                 .FirstOrDefault(w => w.Name == WALL_FAMILY);
-                
+
             double length = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
             using (Transaction tx = new Transaction(document))
@@ -38,7 +38,7 @@ namespace Test
 
                 XYZ start = new XYZ(0, 0, 0);
                 XYZ end = new XYZ(length, 0, 0);
-                _ = Create(start, end, document, wall.Id, level);
+                _ = Create(document, wall.Id, start, end, level);
 
                 tx.Commit();
             }
@@ -46,10 +46,10 @@ namespace Test
             return Result.Succeeded;
         }
 
-        public Wall Create(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level)
+        public Wall Create(Document document, ElementId wallTypeId, XYZ start, XYZ end, Element level)
         {
+            var line = Line.CreateBound(start, end);
             var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            Line line = Line.CreateBound(start, end);
             var wall = Wall.Create(document, line, wallTypeId, level.Id, height, 0, false, false);
 
             return wall;

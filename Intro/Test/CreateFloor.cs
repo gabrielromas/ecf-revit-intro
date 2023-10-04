@@ -21,7 +21,6 @@ namespace Test
         {
             UIApplication uiapplication = commandData.Application;
             UIDocument uidocument = uiapplication.ActiveUIDocument;
-            Autodesk.Revit.ApplicationServices.Application application = uiapplication.Application;
             Document document = uidocument.Document;
 
             var wall = new FilteredElementCollector(document)
@@ -30,6 +29,7 @@ namespace Test
 
             var level = new FilteredElementCollector(document)
                 .OfClass(typeof(Level))
+                .Cast<Level>()
                 .FirstOrDefault(l => l.Name == LEVEL_FAMILY);
 
             var floor = new FilteredElementCollector(document)
@@ -38,7 +38,6 @@ namespace Test
 
             var wallId = document.GetElement(wall.Id) as WallType;
             double width = wallId.Width / 2;
-
             double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
             double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
@@ -46,21 +45,19 @@ namespace Test
             {
                 tx.Start("Create Floor");
 
-                ElementId floorTypeId = Floor.GetDefaultFloorType(document, false);
-
+                ElementId floorId = Floor.GetDefaultFloorType(document, false);
                 XYZ buttomLeft = new XYZ(width, width, 0);
                 XYZ buttomRight = new XYZ(lengthX - width, width, 0);
                 XYZ topLeft = new XYZ(width, lengthY - width, 0);
                 XYZ topRight = new XYZ(lengthX - width, lengthY - width, 0);
 
                 CurveLoop profile = new CurveLoop();
-
                 profile.Append(Line.CreateBound(buttomLeft, topLeft));
                 profile.Append(Line.CreateBound(topLeft, topRight));
                 profile.Append(Line.CreateBound(topRight, buttomRight));
                 profile.Append(Line.CreateBound(buttomRight, buttomLeft));
 
-                _ = Floor.Create(document, new List<CurveLoop> { profile }, floorTypeId, level.Id);
+                _ = Floor.Create(document, new List<CurveLoop> { profile }, floorId, level.Id);
 
                 tx.Commit();
             }

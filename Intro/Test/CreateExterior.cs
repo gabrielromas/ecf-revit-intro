@@ -7,7 +7,6 @@ namespace Test
 {
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
-
     public class CreateExterior : IExternalCommand
     {
         private string EXTERIOR_FAMILY = "EXT_INSexp-5cm";
@@ -21,7 +20,6 @@ namespace Test
         {
             UIApplication uiapplication = commandData.Application;
             UIDocument uidocument = uiapplication.ActiveUIDocument;
-            Autodesk.Revit.ApplicationServices.Application application = uiapplication.Application;
             Document document = uidocument.Document;
 
             var exterior = new FilteredElementCollector(document)
@@ -37,10 +35,9 @@ namespace Test
                .OfCategory(BuiltInCategory.OST_Walls)
                .FirstOrDefault(w => w.Name == WALL_FAMILY);
 
-            var widthWall = Width(document, wall);
-            var widthExterior = Width(document, exterior);
+            double widthWall = Width(document, wall);
+            double widthExterior = Width(document, exterior);
             double width = widthExterior + widthWall;
-
             double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
             double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
@@ -50,19 +47,19 @@ namespace Test
 
                 XYZ start1 = new XYZ(-width, -width, 0);
                 XYZ end1 = new XYZ(lengthX + width, -width, 0);
-                var bottom = CreateW(start1, end1, document, exterior.Id, level, commandData);
+                var bottom = Create(document, exterior.Id, start1, end1, level);
 
                 XYZ start2 = new XYZ(-width, -width, 0);
                 XYZ end2 = new XYZ(-width, lengthY + width, 0);
-                var left = CreateW(start2, end2, document, exterior.Id, level, commandData);
+                var left = Create(document, exterior.Id, start2, end2, level);
 
                 XYZ start3 = new XYZ(-width, lengthY + width, 0);
                 XYZ end3 = new XYZ(lengthX + width, lengthY + width, 0);
-                var top = CreateW(start3, end3, document, exterior.Id, level, commandData);
+                var top = Create(document, exterior.Id, start3, end3, level);
 
                 XYZ start4 = new XYZ(lengthX + width, lengthY + width, 0);
                 XYZ end4 = new XYZ(lengthX + width, -width, 0);
-                var right = CreateW(start4, end4, document, exterior.Id, level, commandData);
+                var right = Create(document, exterior.Id, start4, end4, level);
 
                 App.walls[WallSide.Bottom].ExteriorID = bottom.UniqueId;
                 App.walls[WallSide.Left].ExteriorID = left.UniqueId;
@@ -75,21 +72,18 @@ namespace Test
             return Result.Succeeded;
         }
 
-        public Wall CreateW(XYZ start, XYZ end, Document document, ElementId wallTypeId, Element level, ExternalCommandData commandData)
+        public Wall Create(Document document, ElementId wallId, XYZ start, XYZ end, Element level)
         {
+            var line = Line.CreateBound(start, end);
             var height = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            Line line1 = Line.CreateBound(start, end);
-            var wall = Wall.Create(document, line1, wallTypeId, level.Id, height, 0, false, false);
+            var wall = Wall.Create(document, line, wallId, level.Id, height, 0, false, false);
 
             return wall;
         }
 
         public double Width(Document document, Element wall)
         {
-            WallType wallType = document.GetElement(wall.Id) as WallType;
-            double width = wallType.Width;
-
-            return width / 2;
+            return (document.GetElement(wall.Id) as WallType).Width / 2;
         }
     }
 }
