@@ -17,7 +17,6 @@ namespace Test
         {
             UIApplication uiapplication = commandData.Application;
             UIDocument uidocument = uiapplication.ActiveUIDocument;
-            Autodesk.Revit.ApplicationServices.Application application = uiapplication.Application;
             Document document = uidocument.Document;
 
             //Convert String to Wall
@@ -48,7 +47,11 @@ namespace Test
                 }
                 catch (ArgumentException ex)
                 {
-                    Debug.WriteLine($"Processing failed: {ex.Message}");
+                    Debug.WriteLine($"Bottom wall Join failed: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Bottom wall Join failed: {ex.Message}");
                 }
 
                 try
@@ -58,7 +61,11 @@ namespace Test
                 }
                 catch (ArgumentException ex)
                 {
-                    Debug.WriteLine($"Processing failed: {ex.Message}");
+                    Debug.WriteLine($"Top wall Join failed: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Top wall Join failed: {ex.Message}");
                 }
 
                 try
@@ -68,7 +75,11 @@ namespace Test
                 }
                 catch (ArgumentException ex)
                 {
-                    Debug.WriteLine($"Processing failed: {ex.Message}");
+                    Debug.WriteLine($"Left wall Join failed: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Left wall Join failed: {ex.Message}");
                 }
 
                 try
@@ -78,7 +89,11 @@ namespace Test
                 }
                 catch (ArgumentException ex)
                 {
-                    Debug.WriteLine($"Processing failed: {ex.Message}");
+                    Debug.WriteLine($"Right wall Join failed: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Right wall Join failed: {ex.Message}");
                 }
 
                 tx.Commit();

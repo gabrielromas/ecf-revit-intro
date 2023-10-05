@@ -1,4 +1,5 @@
-﻿using Autodesk.Revit.UI;
+﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -7,6 +8,7 @@ namespace Test
     public class App : IExternalApplication
     {
         public static Dictionary<WallSide, JoinPair> walls = new Dictionary<WallSide, JoinPair>();
+        public static List<ElementId> elementIDS = new List<ElementId>();
 
         public Result OnStartup(UIControlledApplication app)
         {
@@ -55,6 +57,9 @@ namespace Test
 
             var joinWalls = CreatePushButton("joinWalls", "Join\nWalls", typeof(JoinWalls).FullName);
             _ = ribbonPanel.AddItem(joinWalls);
+
+            var deleteElements = CreatePushButton("deleteElements", "Delete\nElements", typeof(DeleteElements).FullName);
+            _ = ribbonPanel.AddItem(deleteElements);
 
         }
 

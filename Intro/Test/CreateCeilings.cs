@@ -12,7 +12,7 @@ namespace Test
     {
         private string FAMILY_WALL = "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60";
         private string FAMILY_CEILING = "Plafon casetat 600x600";
-        private string LEVEL_FAMILY = "Parter";
+        private string LEVEL_NAME = "Parter";
 
         public Result Execute(
             ExternalCommandData commandData,
@@ -29,9 +29,10 @@ namespace Test
 
             var level = new FilteredElementCollector(document)
                 .OfClass(typeof(Level))
-                .FirstOrDefault(l => l.Name == LEVEL_FAMILY);
+                .Cast<Level>()
+                .FirstOrDefault(l => l.Name == LEVEL_NAME);
 
-            var ceiling = new FilteredElementCollector(document)
+            var ceilingElement = new FilteredElementCollector(document)
                 .OfCategory(BuiltInCategory.OST_Ceilings)
                 .FirstOrDefault(f => f.Name == FAMILY_CEILING);
 
@@ -39,13 +40,13 @@ namespace Test
             double width = wallType.Width / 2;
             double lengthX = UnitUtils.Convert(400, UnitTypeId.Centimeters, UnitTypeId.Feet);
             double lengthY = UnitUtils.Convert(600, UnitTypeId.Centimeters, UnitTypeId.Feet);
-            double height = UnitUtils.Convert(3930, UnitTypeId.Millimeters, UnitTypeId.Feet);
+            double height = UnitUtils.Convert(393, UnitTypeId.Centimeters, UnitTypeId.Feet);
 
             using (Transaction tx = new Transaction(document))
             {
                 tx.Start("Create Ceiling");
 
-                ElementId ceilingTypeId = ceiling.GetTypeId();
+                ElementId ceilingTypeId = ceilingElement.GetTypeId();
                 XYZ bottomLeft = new XYZ(width, width, 0);
                 XYZ bottomRight = new XYZ(lengthX - width, width, 0);
                 XYZ topLeft = new XYZ(width, lengthY - width, 0);
@@ -57,10 +58,12 @@ namespace Test
                 profile.Append(Line.CreateBound(topRight, bottomRight));
                 profile.Append(Line.CreateBound(bottomRight, bottomLeft));
 
-                var create = Ceiling.Create(document, new List<CurveLoop> { profile }, ceilingTypeId, level.Id);
+                var ceiling = Ceiling.Create(document, new List<CurveLoop> { profile }, ceilingTypeId, level.Id);
 
-                Parameter param = create.get_Parameter(BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM);
+                Parameter param = ceiling.get_Parameter(BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM);
                 param.Set(height);
+
+                App.elementIDS.Add(ceiling.Id);
 
                 tx.Commit();
             }

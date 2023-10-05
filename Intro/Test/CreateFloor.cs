@@ -11,8 +11,8 @@ namespace Test
     public class CreateFloor : IExternalCommand
     {
         private string WALL_FAMILY = "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60";
-        private string LEVEL_FAMILY = "Parter";
-        private string FLOOR_FAMILY = "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60";
+        private string LEVEL_NAME = "Parter";
+        private string FLOOR_FAMILY = "INT_P_Parchet 1 cm + sapa 6 cm";
 
         public Result Execute(
             ExternalCommandData commandData,
@@ -30,10 +30,11 @@ namespace Test
             var level = new FilteredElementCollector(document)
                 .OfClass(typeof(Level))
                 .Cast<Level>()
-                .FirstOrDefault(l => l.Name == LEVEL_FAMILY);
+                .FirstOrDefault(l => l.Name == LEVEL_NAME);
 
-            var floor = new FilteredElementCollector(document)
-                .OfCategory(BuiltInCategory.OST_Floors)
+            var floorType = new FilteredElementCollector(document)
+                .OfClass(typeof(FloorType))
+                .Cast<FloorType>()
                 .FirstOrDefault(f => f.Name == FLOOR_FAMILY);
 
             var wallId = document.GetElement(wall.Id) as WallType;
@@ -45,19 +46,21 @@ namespace Test
             {
                 tx.Start("Create Floor");
 
-                ElementId floorId = Floor.GetDefaultFloorType(document, false);
-                XYZ buttomLeft = new XYZ(width, width, 0);
-                XYZ buttomRight = new XYZ(lengthX - width, width, 0);
+                //ElementId floorId = Floor.GetDefaultFloorType(document, false);
+                XYZ bottomLeft = new XYZ(width, width, 0);
+                XYZ bottomRight = new XYZ(lengthX - width, width, 0);
                 XYZ topLeft = new XYZ(width, lengthY - width, 0);
                 XYZ topRight = new XYZ(lengthX - width, lengthY - width, 0);
 
                 CurveLoop profile = new CurveLoop();
-                profile.Append(Line.CreateBound(buttomLeft, topLeft));
+                profile.Append(Line.CreateBound(bottomLeft, topLeft));
                 profile.Append(Line.CreateBound(topLeft, topRight));
-                profile.Append(Line.CreateBound(topRight, buttomRight));
-                profile.Append(Line.CreateBound(buttomRight, buttomLeft));
+                profile.Append(Line.CreateBound(topRight, bottomRight));
+                profile.Append(Line.CreateBound(bottomRight, bottomLeft));
 
-                _ = Floor.Create(document, new List<CurveLoop> { profile }, floorId, level.Id);
+                var floor = Floor.Create(document, new List<CurveLoop> { profile }, floorType.Id, level.Id);
+
+                App.elementIDS.Add(floor.Id);
 
                 tx.Commit();
             }

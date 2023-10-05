@@ -66,6 +66,7 @@
     <Compile Include="App.cs" />
     <Compile Include="CreateCeilings.cs" />
     <Compile Include="CreateDoors.cs" />
+    <Compile Include="DeleteElements.cs" />
     <Compile Include="WallSide.cs" />
     <Compile Include="JoinPair.cs" />
     <Compile Include="CreateWall.cs" />
