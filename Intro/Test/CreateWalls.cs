@@ -54,25 +54,13 @@ namespace Test
                 XYZ end4 = new XYZ(lengthX, 0, 0);
                 var right = Create(document, wall.Id, start4, end4, level);
 
-                App.walls[WallSide.Bottom] = new JoinPair
-                {
-                    WallID = bottom.UniqueId
-                };
-                App.walls[WallSide.Left] = new JoinPair
-                {
-                    WallID = left.UniqueId
-                };
-                App.walls[WallSide.Top] = new JoinPair
-                {
-                    WallID = top.UniqueId
-                };
-                App.walls[WallSide.Right] = new JoinPair
-                {
-                    WallID = right.UniqueId
-                };
+                App.walls[WallSide.Bottom].WallID = bottom.UniqueId;
+                App.walls[WallSide.Left].WallID = left.UniqueId;
+                App.walls[WallSide.Top].WallID = top.UniqueId;
+                App.walls[WallSide.Right].WallID = right.UniqueId;
 
                 App.elementIDS.Add(top.Id);
-                App.elementIDS.Add(bottom.Id); 
+                App.elementIDS.Add(bottom.Id);
                 App.elementIDS.Add(left.Id);
                 App.elementIDS.Add(right.Id);
 

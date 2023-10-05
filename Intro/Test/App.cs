@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using System.Collections.Generic;
 using System.Reflection;
@@ -12,13 +13,22 @@ namespace Test
 
         public Result OnStartup(UIControlledApplication app)
         {
+            app.ControlledApplication.DocumentOpened += ControlledApplication_DocumentOpened;
+
             RibbonTab(app);
             return Result.Succeeded;
         }
-
         public Result OnShutdown(UIControlledApplication application)
         {
             return Result.Succeeded;
+        }
+
+        private void ControlledApplication_DocumentOpened(object sender, DocumentOpenedEventArgs e)
+        {
+            walls[WallSide.Bottom] = new JoinPair();
+            walls[WallSide.Left] = new JoinPair();
+            walls[WallSide.Top] = new JoinPair();
+            walls[WallSide.Right] = new JoinPair();
         }
 
         public void RibbonTab(UIControlledApplication app)
@@ -26,7 +36,7 @@ namespace Test
             string tab = "Intro";
             app.CreateRibbonTab(tab);
 
-            Autodesk.Revit.UI.RibbonPanel ribbonPanel = app.CreateRibbonPanel(tab, "Intro Panel");
+            RibbonPanel ribbonPanel = app.CreateRibbonPanel(tab, "Intro Panel");
 
             var create1 = CreatePushButton("createWalls", "   1   ", typeof(CreateWall).FullName);
             var create4 = CreatePushButton("createFourWalls", "   4   ", typeof(CreateWalls).FullName);
@@ -58,7 +68,7 @@ namespace Test
             var joinWalls = CreatePushButton("joinWalls", "Join\nWalls", typeof(JoinWalls).FullName);
             _ = ribbonPanel.AddItem(joinWalls);
 
-            var deleteElements = CreatePushButton("deleteElements", "Delete\nElements", typeof(DeleteElements).FullName);
+            var deleteElements = CreatePushButton("deleteElements", "Delete\nElements", typeof(DeleteElementsB).FullName);
             _ = ribbonPanel.AddItem(deleteElements);
 
         }

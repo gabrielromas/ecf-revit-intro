@@ -39,6 +39,8 @@ namespace Test
                 {
                     tx.Start();
 
+                    doorSymbol.Activate();
+
                     XYZ location = new XYZ(lengthX / 2, lengthY / 2, 0);
 
                     var door1 = document.Create.NewFamilyInstance(

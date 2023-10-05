@@ -50,16 +50,16 @@ namespace Test
                 XYZ end1 = new XYZ(lengthX - width, width, 0);
                 var bottom = Create(document, interior.Id, start1, end1, level);
 
-                XYZ start2 = new XYZ(width, width, 0);
-                XYZ end2 = new XYZ(width, lengthY - width, 0);
+                XYZ start2 = new XYZ(width, lengthY - width, 0);
+                XYZ end2 = new XYZ(width, width, 0);
                 var left = Create(document, interior.Id, start2, end2, level);
 
-                XYZ start3 = new XYZ(width, lengthY - width, 0);
-                XYZ end3 = new XYZ(lengthX - width, lengthY - width, 0);
+                XYZ start3 = new XYZ(lengthX - width, lengthY - width, 0);
+                XYZ end3 = new XYZ(width, lengthY - width, 0);
                 var top = Create(document, interior.Id, start3, end3, level);
 
-                XYZ start4 = new XYZ(lengthX - width, lengthY - width, 0);
-                XYZ end4 = new XYZ(lengthX - width, width, 0);
+                XYZ start4 = new XYZ(lengthX - width, width, 0);
+                XYZ end4 = new XYZ(lengthX - width, lengthY - width, 0);
                 var right = Create(document, interior.Id, start4, end4, level);
 
                 App.walls[WallSide.Bottom].InteriorID = bottom.UniqueId;
@@ -67,10 +67,10 @@ namespace Test
                 App.walls[WallSide.Top].InteriorID = top.UniqueId;
                 App.walls[WallSide.Right].InteriorID = right.UniqueId;
 
-                App.elementIDS.Add(left.Id);
-                App.elementIDS.Add(right.Id);
-                App.elementIDS.Add(top.Id);
                 App.elementIDS.Add(bottom.Id);
+                App.elementIDS.Add(left.Id);
+                App.elementIDS.Add(top.Id);
+                App.elementIDS.Add(right.Id);
 
                 tx.Commit();
             }

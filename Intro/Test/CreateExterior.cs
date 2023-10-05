@@ -9,9 +9,9 @@ namespace Test
     [Regeneration(RegenerationOption.Manual)]
     public class CreateExterior : IExternalCommand
     {
+        private string WALL_FAMILY = "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60";
         private string EXTERIOR_FAMILY = "EXT_INSexp-5cm";
         private string LEVEL_NAME = "Parter";
-        private string WALL_FAMILY = "INT_G_GK3 2xRB+ISO+CW/UW 75/600+2xRB_125 EI60";
 
         public Result Execute(
             ExternalCommandData commandData,
@@ -45,8 +45,8 @@ namespace Test
             {
                 tx.Start("Create Exterior Walls");
 
-                XYZ start1 = new XYZ(-width, -width, 0);
-                XYZ end1 = new XYZ(lengthX + width, -width, 0);
+                XYZ start1 = new XYZ(lengthX + width, -width, 0);
+                XYZ end1 = new XYZ(-width, -width, 0);
                 var bottom = Create(document, exterior.Id, start1, end1, level);
 
                 XYZ start2 = new XYZ(-width, -width, 0);
